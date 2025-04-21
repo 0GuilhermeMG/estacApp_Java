@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Carros</title></head>
+<body>
+  <h1>Carros</h1>
+  <a href="form.html">Novo Carro</a>
+  <ul id="lista"></ul>
+  <script>
+    fetch('/getAllCarros')
+      .then(r=>r.json())
+      .then(dados => {
+        const ul = document.getElementById('lista');
+        dados.forEach(c => {
+          const li = document.createElement('li');
+          li.textContent = `${c.placa} – ${new Date(c.entrada).toLocaleString()} - ${new Date(c.saida).toLocaleString()} - R$ ${c.valor.toFixed(2)}`;
+          ul.append(li);
+        });
+      });
+  </script>
+</body>
+</html>

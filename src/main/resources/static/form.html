@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Novo Carro</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; }
+    label { display: block; margin-top: 1rem; }
+    button { margin-top: 1.5rem; padding: 0.5rem 1rem; }
+    #mensagem { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Registrar Carro</h1>
+  <form id="carroForm">
+    <label>Placa:<input type="text" id="placa" required /></label>
+    <label>Entrada:<input type="datetime-local" id="entrada" required /></label>
+    <label>Saída:<input type="datetime-local" id="saida" required /></label>
+    <button type="submit">Salvar</button>
+  </form>
+  <div id="mensagem"></div>
+
+  <script>
+    document.getElementById('carroForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const placa   = document.getElementById('placa').value;
+      const entrada = document.getElementById('entrada').value;
+      const saida   = document.getElementById('saida').value;
+
+      try {
+        const resp = await fetch('/addCarro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ placa, entrada, saida })
+        });
+        if (!resp.ok) throw new Error(`Status ${resp.status}`);
+
+        const data = await resp.json();
+        console.log('Retorno do back:', data);
+        // Use o nome exato do campo de valor, ex data.valorPago
+        const valor = data.valorPago ?? data.valor; 
+        document.getElementById('mensagem').innerText =
+          `✅ Carro cadastrado! Valor: R$ ${Number(valor).toFixed(2)}`;
+        e.target.reset();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('mensagem').innerText =
+          `❌ Erro ao cadastrar: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

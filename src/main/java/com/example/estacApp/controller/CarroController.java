@@ -6,7 +6,7 @@ import com.example.estacApp.repo.CarroRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+//import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -27,10 +27,10 @@ public class CarroController {
             carroRepo.findAll().forEach(carroList::add);
 
             if(carroList.isEmpty()){
-                return new ResponseEntity<>(carroList, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(carroList, HttpStatus.OK);
 
         }catch (Exception ex){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -58,6 +58,7 @@ public class CarroController {
             double valorPorHora = 5.0;
             double valortrue = (minutos / 60.0) * valorPorHora;
             carro.setValor(valortrue);
+            
         }else {
             // Caso a entrada ou saída esteja nula, opcionalmente retornar erro
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -65,6 +66,8 @@ public class CarroController {
 
         Carro carroObj = carroRepo.save(carro);
         return new ResponseEntity<>(carroObj, HttpStatus.OK);
+        //return ResponseEntity.ok(carroObj);
+
     }
 
    /*@PostMapping("/updateCarroById/{id}")
