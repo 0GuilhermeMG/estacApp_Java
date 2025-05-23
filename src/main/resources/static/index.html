@@ -1,21 +1,155 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Carros</title></head>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carros Estacionados</title>
+  <style>
+    /* Cole aqui o CSS completo da versão anterior */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 2rem; }
+    #carListContainer { background-color: #ffffff; padding: 2.5rem 3rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 850px; text-align: center; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; border-bottom: 1px solid #eee; padding-bottom: 1.5rem; }
+    h1 { color: #2c3e50; font-weight: 600; margin: 0; text-align: left; font-size: 1.8rem; }
+    .btn-novo { display: inline-block; background-color: #27ae60; color: white; border: none; padding: 0.8rem 1.3rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); white-space: nowrap; }
+    .btn-novo:hover { background-color: #229954; transform: translateY(-2px); }
+    #lista { list-style: none; padding: 0; text-align: left; }
+    #lista li { background-color: #ffffff; padding: 1.5rem 1rem 1.5rem 2rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.5s ease; flex-wrap: wrap; }
+    #lista li.deleting { opacity: 0; transform: translateX(-50px); }
+    #lista li:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); border-color: #3498db; }
+    .data-container { display: flex; flex-wrap: wrap; flex-grow: 1; }
+    .data-item { display: flex; flex-direction: column; padding: 0.5rem; flex: 1; min-width: 150px; margin: 5px; }
+    .data-item .label { font-size: 0.75rem; color: #888; margin-bottom: 0.3rem; text-transform: uppercase; font-weight: 500; }
+    .data-item .value { font-size: 1.05rem; font-weight: 600; color: #333; }
+    .data-item .value.plate { color: #3498db; font-weight: 700; font-size: 1.1rem; }
+    .data-item .value.price { color: #27ae60; font-weight: 700; font-size: 1.15rem; }
+    .data-item.price-item { flex-grow: 0.5; text-align: right; }
+    .action-item { display: flex; align-items: center; justify-content: center; padding-left: 1rem; flex-shrink: 0; }
+    .btn-delete { background-color: #e74c3c; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0 2px 5px rgba(231, 76, 60, 0.4); line-height: 1; }
+    .btn-delete:hover { background-color: #c0392b; transform: scale(1.1); }
+    #lista:empty::before { content: "Carregando lista ou nenhum carro registrado..."; display: block; padding: 2rem; background-color: #f0f0f0; border-radius: 6px; text-align: center; color: #777; }
+    #lista .error-message { background-color: #ffebee; color: #c62828; padding: 1rem; border-radius: 6px; border: 1px solid #ef9a9a; }
+    @media (max-width: 768px) {
+        .header-container { flex-direction: column; align-items: flex-start; }
+        h1 { margin-bottom: 1rem; }
+        .btn-novo { width: 100%; text-align: center; }
+        #lista li { flex-direction: column; align-items: stretch; }
+        .data-container { width: 100%; }
+        .data-item { width: 100%; border-bottom: 1px dashed #eee; padding: 0.8rem 0; }
+        .data-item:last-child { border-bottom: none; }
+        .data-item, .data-item.price-item { text-align: left; }
+        .action-item { padding-left: 0; margin-top: 1rem; align-self: flex-end; }
+    }
+  </style>
+</head>
 <body>
-  <h1>Carros</h1>
-  <a href="form.html">Novo Carro</a>
-  <ul id="lista"></ul>
+
+  <div id="carListContainer">
+    <div class="header-container">
+        <h1>🅿️ Carros Estacionados</h1>
+        <a href="form.html" class="btn-novo">➕ Novo Carro</a>
+    </div>
+    <ul id="lista">
+        </ul>
+  </div>
+
   <script>
-    fetch('/getAllCarros')
-      .then(r=>r.json())
-      .then(dados => {
-        const ul = document.getElementById('lista');
-        dados.forEach(c => {
-          const li = document.createElement('li');
-          li.textContent = `${c.placa} – ${new Date(c.entrada).toLocaleString()} - ${new Date(c.saida).toLocaleString()} - R$ ${c.valor.toFixed(2)}`;
-          ul.append(li);
-        });
-      });
+    const ul = document.getElementById('lista');
+
+    function carregarCarros() {
+        fetch('/getAllCarros')
+          .then(r => {
+              if (!r.ok) throw new Error(`Erro na rede: ${r.status}`);
+              return r.json();
+          })
+          .then(dados => {
+            ul.innerHTML = '';
+
+            if (dados.length === 0) {
+                ul.innerHTML = '<li>Nenhum carro registrado no momento.</li>';
+                return;
+            }
+
+            dados.forEach(c => {
+              // **VERIFIQUE SE 'c.id' ESTÁ SENDO RETORNADO PELO SEU BACKEND!**
+              if (c.id === undefined || c.id === null) {
+                  console.error("Carro recebido sem ID! Verifique o backend /getAllCarros.", c);
+                  return; // Pula este carro se não tiver ID
+              }
+
+              const li = document.createElement('li');
+              li.setAttribute('data-id', c.id); // **Usa o ID numérico**
+              li.setAttribute('data-placa', c.placa || 'N/A'); // Mantém a placa para a mensagem
+
+              const entradaFmt = c.entrada ? new Date(c.entrada).toLocaleString('pt-BR') : 'N/A';
+              const saidaFmt = c.saida ? new Date(c.saida).toLocaleString('pt-BR') : 'N/A';
+              const valorFmt = c.valor ? Number(c.valor).toFixed(2) : '0.00';
+
+              li.innerHTML = `
+                <div class="data-container">
+                    <div class="data-item"> <span class="label">Placa</span> <span class="value plate">${c.placa || 'N/A'}</span> </div>
+                    <div class="data-item"> <span class="label">Entrada</span> <span class="value">${entradaFmt}</span> </div>
+                    <div class="data-item"> <span class="label">Saída</span> <span class="value">${saidaFmt}</span> </div>
+                    <div class="data-item price-item"> <span class="label">Valor</span> <span class="value price">R$ ${valorFmt}</span> </div>
+                </div>
+                <div class="action-item">
+                    <button class="btn-delete" title="Excluir Carro">🗑️</button>
+                </div>
+              `;
+              ul.append(li);
+            });
+          })
+          .catch(err => {
+              console.error("Falha ao buscar carros:", err);
+              ul.innerHTML = `<li class="error-message">Falha ao carregar os dados. Tente novamente.</li>`;
+          });
+    }
+
+    // Event Listener para o Botão Delete (Delegação)
+    ul.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('btn-delete')) {
+            const button = e.target;
+            const li = button.closest('li');
+            const idParaDeletar = li.dataset.id;     // **Pega o ID numérico**
+            const placaParaMsg = li.dataset.placa; // Pega a placa para a mensagem
+
+            if (!idParaDeletar) {
+                alert("Erro: Não foi possível identificar o ID do carro para exclusão.");
+                return;
+            }
+
+            if (confirm(`Tem certeza que deseja excluir o carro com placa ${placaParaMsg}?`)) {
+                button.disabled = true;
+                button.textContent = '⏳';
+
+                try {
+                    // **USA A NOVA URL COM O ID NA ROTA**
+                    const resp = await fetch(`/deleteCarroById/${idParaDeletar}`, {
+                        method: 'DELETE'
+                    });
+
+                    // Verifica se a resposta foi OK (200), como o controller retorna
+                    if (!resp.ok || resp.status !== 200) {
+                        const errorData = await resp.text();
+                        throw new Error(`Erro ${resp.status}: ${errorData || 'Falha ao excluir.'}`);
+                    }
+
+                    // Sucesso! Anima e remove
+                    li.classList.add('deleting');
+                    setTimeout(() => li.remove(), 500);
+
+                } catch (err) {
+                    console.error("Erro ao excluir:", err);
+                    alert(`Não foi possível excluir o carro: ${err.message}`);
+                    button.disabled = false;
+                    button.textContent = '🗑️';
+                }
+            }
+        }
+    });
+
+    // Carrega os carros
+    carregarCarros();
   </script>
 </body>
 </html>

@@ -2,30 +2,171 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Novo Carro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Carro</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; }
-    label { display: block; margin-top: 1rem; }
-    button { margin-top: 1.5rem; padding: 0.5rem 1rem; }
-    #mensagem { margin-top: 1rem; font-weight: bold; }
+    /* Cole aqui o CSS da sua página de formulário estilizada */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    #carroFormContainer {
+      background-color: #ffffff;
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 2rem;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="datetime-local"]:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    input.error { /* Estilo para campo com erro */
+        border-color: #c62828 !important; 
+        box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.2) !important;
+    }
+
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    #mensagem {
+      margin-top: 1.5rem;
+      font-weight: bold;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      min-height: 50px; 
+      display: none; 
+      text-align: center;
+    }
+
+    #mensagem.sucesso {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      display: block;
+    }
+
+    #mensagem.erro {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <h1>Registrar Carro</h1>
-  <form id="carroForm">
-    <label>Placa:<input type="text" id="placa" required /></label>
-    <label>Entrada:<input type="datetime-local" id="entrada" required /></label>
-    <label>Saída:<input type="datetime-local" id="saida" required /></label>
-    <button type="submit">Salvar</button>
-  </form>
-  <div id="mensagem"></div>
+
+  <div id="carroFormContainer">
+    <h1>🚗 Registrar Carro</h1>
+    <form id="carroForm">
+      <label>Placa:
+        <input type="text" id="placa" placeholder="Ex: ABC-1234" required />
+      </label>
+      <label>Entrada:
+        <input type="datetime-local" id="entrada" required />
+      </label>
+      <label>Saída:
+        <input type="datetime-local" id="saida" required />
+      </label>
+      <button type="submit">Salvar</button>
+    </form>
+    <div id="mensagem"></div>
+  </div>
 
   <script>
     document.getElementById('carroForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const placa   = document.getElementById('placa').value;
-      const entrada = document.getElementById('entrada').value;
-      const saida   = document.getElementById('saida').value;
+      e.preventDefault(); // Impede o envio padrão do formulário
+
+      const placaInput = document.getElementById('placa');
+      const entradaInput = document.getElementById('entrada');
+      const saidaInput = document.getElementById('saida');
+      const mensagemDiv = document.getElementById('mensagem');
+
+      const placa = placaInput.value;
+      const entrada = entradaInput.value;
+      const saida = saidaInput.value;
+
+      // Limpa erros anteriores
+      mensagemDiv.innerText = '';
+      mensagemDiv.className = '';
+      saidaInput.classList.remove('error');
+
+      // --- VALIDAÇÃO DA DATA DE SAÍDA ---
+      const entradaDate = new Date(entrada);
+      const saidaDate = new Date(saida);
+
+      if (saidaDate < entradaDate) {
+        mensagemDiv.className = 'erro'; // Aplica estilo de erro
+        mensagemDiv.innerText = '❌ A data/hora de saída não pode ser anterior à entrada!';
+        saidaInput.classList.add('error'); // Adiciona classe de erro ao input
+        saidaInput.focus(); // Foca no campo com problema
+        return; // Interrompe a execução aqui, não envia o formulário
+      }
+      // --- FIM DA VALIDAÇÃO ---
 
       try {
         const resp = await fetch('/addCarro', {
@@ -33,21 +174,41 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ placa, entrada, saida })
         });
-        if (!resp.ok) throw new Error(`Status ${resp.status}`);
+
+        if (!resp.ok) {
+           // Tenta ler a mensagem de erro do backend, se houver
+           let errorMsg = `Status ${resp.status}`;
+           try {
+              const errorData = await resp.json();
+              errorMsg = errorData.message || errorData.error || errorMsg;
+           } catch(jsonErr) {
+               // Mantém a mensagem de status se não houver JSON
+           }
+           throw new Error(errorMsg);
+        }
 
         const data = await resp.json();
         console.log('Retorno do back:', data);
-        // Use o nome exato do campo de valor, ex data.valorPago
-        const valor = data.valorPago ?? data.valor; 
-        document.getElementById('mensagem').innerText =
+        const valor = data.valorPago ?? data.valor ?? 0; // Garante um valor padrão
+
+        mensagemDiv.className = 'sucesso';
+        mensagemDiv.innerText =
           `✅ Carro cadastrado! Valor: R$ ${Number(valor).toFixed(2)}`;
-        e.target.reset();
+        e.target.reset(); // Limpa o formulário
+
       } catch (err) {
         console.error(err);
-        document.getElementById('mensagem').innerText =
+        mensagemDiv.className = 'erro';
+        mensagemDiv.innerText =
           `❌ Erro ao cadastrar: ${err.message}`;
       }
     });
+
+    // Opcional: Remover o erro visual quando o usuário corrigir
+    document.getElementById('saida').addEventListener('change', (e) => {
+        e.target.classList.remove('error');
+    });
+
   </script>
 </body>
 </html>
