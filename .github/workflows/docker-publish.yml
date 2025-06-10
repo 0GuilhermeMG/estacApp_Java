@@ -1,0 +1,52 @@
+# Nome do seu workflow (aparecerá na aba "Actions" do GitHub)
+name: Docker Build and Push
+
+# Define quando o workflow será executado
+on:
+  push: # Dispara em qualquer push
+    branches:
+      - main # Executa apenas para pushes na branch 'main'
+      # Se sua branch principal for 'master', mude para 'master'
+      # Para executar em outras branches, adicione-as aqui, ex: [ main, develop ]
+
+jobs:
+  build-and-push-docker-image:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest # Define a máquina virtual que executará os passos
+
+    steps:
+      # Passo 1: Faz o checkout do código do seu repositório
+      - name: Checkout code
+        uses: actions/checkout@v4 # Ação oficial para checkout
+
+      # Passo 2: Configura o QEMU (para builds multi-plataforma, opcional mas bom)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Passo 3: Configura o Docker Buildx (builder avançado do Docker)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Passo 4: Login no Docker Hub
+      # Usa os secrets que você configurou no repositório
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Passo 5: Constrói a imagem Docker e a envia para o Docker Hub
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # O contexto do build (diretório do Dockerfile, '.' para raiz)
+          file: ./Dockerfile # Caminho para o seu Dockerfile (se não estiver na raiz, ajuste)
+          push: true # Define como 'true' para enviar a imagem após o build
+          tags: | # Tags para sua imagem. Substitua pelos seus valores!
+            0guilhermemg/estacapp:latest
+            0guilhermemg/estacapp:${{ github.sha }}
+          # A tag 'latest' aponta para a última versão.
+          # A tag com 'github.sha' usa o hash do commit, o que é ótimo para versionamento.
+          # Exemplo de 'tags':
+          #   meunome/meuapp:latest
+          #   meunome/meuapp:${{ github.sha }}

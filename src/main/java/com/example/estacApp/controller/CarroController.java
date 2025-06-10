@@ -70,21 +70,42 @@ public class CarroController {
 
     }
 
-   /*@PostMapping("/updateCarroById/{id}")
-    public ResponseEntity<Carro> updateCarroById(@PathVariable Long id, @RequestBody Carro newCarroData){
-        Optional<Carro> oldCarroData =  carroRepo.findById(id);
+   @PutMapping("/updateCarroById/{id}")
+public ResponseEntity<Carro> updateCarroById(@PathVariable Long id, @RequestBody Carro newCarroData){
+    Optional<Carro> oldCarroData =  carroRepo.findById(id);
 
-        if(oldCarroData.isPresent()){
-            Carro updatedCarroData = oldCarroData.get();
-            updatedCarroData.setPlaca(newCarroData.getPlaca());
-            updatedCarroData.setValor(newCarroData.getValor());
+    if(oldCarroData.isPresent()){
+        // Pega a entidade existente do banco
+        Carro updatedCarroData = oldCarroData.get();
 
-            Carro carro = carroRepo.save(updatedCarroData);
-            return new ResponseEntity<>(carroObj, HttpStatus.OK);
+        // Atualiza os dados com as informações recebidas
+        updatedCarroData.setPlaca(newCarroData.getPlaca());
+        updatedCarroData.setEntrada(newCarroData.getEntrada());
+        updatedCarroData.setSaida(newCarroData.getSaida());
+
+        // --- LÓGICA DE RECALCULAR O VALOR ---
+        // Se ambos os horários estiverem presentes, recalcula o valor
+        if (updatedCarroData.getEntrada() != null && updatedCarroData.getSaida() != null) {
+            Duration duracao = Duration.between(updatedCarroData.getEntrada(), updatedCarroData.getSaida());
+            long minutos = duracao.toMinutes();
+
+            double valorPorHora = 5.0; // Mantenha a mesma lógica de preço
+            double valortrue = (minutos / 60.0) * valorPorHora;
+            updatedCarroData.setValor(valortrue);
+        } else {
+            // Se um dos horários for nulo, pode zerar o valor ou manter o antigo
+            updatedCarroData.setValor(0.0);
         }
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }*/
+        // Salva a entidade completamente atualizada
+        Carro carroSalvo = carroRepo.save(updatedCarroData);
+
+        // Retorna o objeto atualizado com o novo valor
+        return new ResponseEntity<>(carroSalvo, HttpStatus.OK);
+    }
+
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+}
 
     @DeleteMapping("/deleteCarroById/{id}")
     public ResponseEntity<HttpStatus> deleteCarroById(@PathVariable Long id){
