@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copia o JAR gerado para dentro do container
-COPY target/estacapp.jar app.jar
+COPY target/estacApp-0.0.1-SNAPSHOT.jar app.jar
 
 # Expõe a porta usada pela aplicação (ajuste se necessário)
 EXPOSE 9090
