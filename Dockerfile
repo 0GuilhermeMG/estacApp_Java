@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/estacapp.jar app.jar
 
 # Expõe a porta usada pela aplicação (ajuste se necessário)
-EXPOSE 8080
+EXPOSE 9090
 
 # Comando para rodar o JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]
