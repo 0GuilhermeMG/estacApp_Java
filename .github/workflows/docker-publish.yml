@@ -5,7 +5,7 @@ name: Docker Build and Push
 on:
   push: # Dispara em qualquer push
     branches:
-      - main # Executa apenas para pushes na branch 'main'
+      - master # Executa apenas para pushes na branch 'main'
       # Se sua branch principal for 'master', mude para 'master'
       # Para executar em outras branches, adicione-as aqui, ex: [ main, develop ]
 
