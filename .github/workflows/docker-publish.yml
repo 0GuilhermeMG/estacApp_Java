@@ -19,6 +19,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # Ação oficial para checkout
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin' # Uma distribuição popular e robusta do OpenJDK
+
+      - name: Build Java project with Maven
+        run: mvn -B package --file pom.xml
+
       # Passo 2: Configura o QEMU (para builds multi-plataforma, opcional mas bom)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
